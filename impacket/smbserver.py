@@ -502,6 +502,9 @@ def findFirst2(path, fileName, level, searchAttributes, pktFlags=smb.SMB.FLAGS2_
             item['LastAccessTime'] = getSMBTime(atime)
             item['LastWriteDate'] = getSMBDate(mtime)
             item['LastWriteTime'] = getSMBTime(mtime)
+        elif level in [smb.SMB_FIND_FILE_NAMES_INFO, smb2.SMB2_FILE_NAMES_INFO]:
+            padLen = (8 - (len(item) % 8)) % 8
+            item['NextEntryOffset'] = len(item) + padLen
         searchResult.append(item)
 
     # No more files
@@ -2460,7 +2463,7 @@ class SMBCommands:
                             mechStr = MechTypes[mechType]
                         else:
                             mechStr = hexlify(mechType)
-                        smbServer.log("Unsupported MechType '%s'" % mechStr, logging.CRITICAL)
+                        smbServer.log("Unsupported MechType '%s'" % mechStr, logging.DEBUG)
                         # We don't know the token, we answer back again saying
                         # we just support NTLM.
                         # ToDo: Build this into a SPNEGO_NegTokenResp()
@@ -2862,7 +2865,7 @@ class SMB2Commands:
                         mechStr = MechTypes[mechType]
                     else:
                         mechStr = hexlify(mechType)
-                    smbServer.log("Unsupported MechType '%s'" % mechStr, logging.CRITICAL)
+                    smbServer.log("Unsupported MechType '%s'" % mechStr, logging.DEBUG)
                     # We don't know the token, we answer back again saying
                     # we just support NTLM.
                     # ToDo: Build this into a SPNEGO_NegTokenResp()
